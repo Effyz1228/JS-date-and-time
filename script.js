@@ -181,32 +181,26 @@ let currentAccount,timer;
 // const hour =`${now.getHours()}`.padStart(2,0);
 // const min =`${now.getMinutes()}`.padStart(2,0);
 //logout timer:
-
-const startLogoutTimer =()=>{
-  //set the time to 5mins
-  let logoutTime=30;
-  let logoutMins;
-  let logoutSecs;
+const startLogoutTimer=()=>{
+  let logoutTime = 300;
+  let logoutMins,logoutSecs;
 
   const tick=()=>{
-    logoutMins = String(Math.trunc(logoutTime /60)).padStart(2,0);
-    logoutSecs = String(logoutTime %60).padStart(2,0);
-    //show the remaining time in UI
+    logoutMins=String(Math.trunc(logoutTime/60)).padStart(2,0);
+    logoutSecs=String(logoutTime%60).padStart(2,0);
     labelTimer.textContent=`${logoutMins}:${logoutSecs}`;
-    //when time =0 log out,stop the timer
+
     if(logoutTime===0){
-      clearInterval(timer);
+      clearInterval(timer);      
       containerApp.style.opacity =0;
-      labelWelcome.textContent="You are logged out!"
+      labelWelcome.textContent="Log in to get started!";
     }
-    //decreat the remaining time
-    logoutTime--; 
+    logoutTime--;
   }
-  //call the time every sec
   tick();
   timer=setInterval(tick,1000);
-  console.log(timer);
 }
+
 
 btnLogin.addEventListener('click',e=>{
   e.preventDefault();
