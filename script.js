@@ -86,7 +86,6 @@ const formatDate =function(date,locale){
   const calcDayPassed =(date1,date2)=>Math.round(Math.abs(date1-date2)/(1000 * 60 * 60 *24));
 
   const daysPassed =calcDayPassed(new Date(),date);
-  console.log(daysPassed);
 
   if(daysPassed <1)return `Today`;
   if(daysPassed ===2)return  `Yesterday`;
@@ -102,7 +101,7 @@ const formatDate =function(date,locale){
 }
 
 const currencyDisplayer=function(value,locale,currency){
-  return Intl.NumberFormat(locale,
+  return new Intl.NumberFormat(locale,
     {style:'currency',
     currency:currency}).format(value);
 }
@@ -171,10 +170,7 @@ const displayAccountUI =function(acct){
   displaySummary(acct);
 }
 
-let currentAccount;
-currentAccount= accounts[0];
-displayAccountUI(currentAccount);
-containerApp.style.opacity=100;
+let currentAccount,timer;
 //the login function
 
 //show current time when logged in successfully
@@ -184,8 +180,33 @@ containerApp.style.opacity=100;
 // const year =now.getFullYear();
 // const hour =`${now.getHours()}`.padStart(2,0);
 // const min =`${now.getMinutes()}`.padStart(2,0);
+//logout timer:
 
+const startLogoutTimer =()=>{
+  //set the time to 5mins
+  let logoutTime=30;
+  let logoutMins;
+  let logoutSecs;
 
+  const tick=()=>{
+    logoutMins = String(Math.trunc(logoutTime /60)).padStart(2,0);
+    logoutSecs = String(logoutTime %60).padStart(2,0);
+    //show the remaining time in UI
+    labelTimer.textContent=`${logoutMins}:${logoutSecs}`;
+    //when time =0 log out,stop the timer
+    if(logoutTime===0){
+      clearInterval(timer);
+      containerApp.style.opacity =0;
+      labelWelcome.textContent="You are logged out!"
+    }
+    //decreat the remaining time
+    logoutTime--; 
+  }
+  //call the time every sec
+  tick();
+  timer=setInterval(tick,1000);
+  console.log(timer);
+}
 
 btnLogin.addEventListener('click',e=>{
   e.preventDefault();
@@ -200,6 +221,10 @@ btnLogin.addEventListener('click',e=>{
     displayAccountUI(currentAccount);
     
     labelDate.textContent=new Intl.DateTimeFormat(currentAccount.locale).format(now);
+
+    //if someone already logged in then log into another account...
+    if(timer)clearInterval(timer);
+    startLogoutTimer();
   }  
 })
 
@@ -221,6 +246,8 @@ btnTransfer.addEventListener('click',e=>{
     rAcct.movementsDates.push(now.toISOString());
 
     displayAccountUI(currentAccount);
+    clearInterval(timer);
+    startLogoutTimer();
 
   }else {console.log("invalid")}
 })
@@ -229,9 +256,13 @@ btnLoan.addEventListener('click',e=>{
   e.preventDefault();
   const amount = Math.floor(inputLoanAmount.value);
   if(amount>0 && currentAccount.movements.some(mov=>mov>=amount*0.1)){
-    currentAccount.movements.push(amount);
-    currentAccount.movementsDates.push(now.toISOString());
-    displayAccountUI(currentAccount);
+    setTimeout(()=>{
+      currentAccount.movements.push(amount);
+      currentAccount.movementsDates.push(now.toISOString());
+      displayAccountUI(currentAccount);
+    },3000)
+    clearInterval(timer);
+    startLogoutTimer();
   }
   else{
     alert("You can't borrow that much money!")
@@ -267,4 +298,11 @@ btnSort.addEventListener('click',e=>{
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
-console.log(new Date()-new Date('2021 Dec 02'))
+// console.log(new Date()-new Date('2021 Dec 02'))
+
+
+
+// setInterval(() => {  
+//   const timer =new Date();
+//   console.log(`Now is ${timer.getHours()}:${timer.getMinutes()}:${timer.getSeconds()}`)
+// }, 1000);
